@@ -1,0 +1,24 @@
+{
+    "name": "manga-scraper",
+    "version": "0.0.1",
+    "description": "This package will be used to scrape some manga websites via https://market.mashape.com/doodle/manga-scraper",
+    "main": "index.js",
+    "dependencies": {
+        "async": "^2.6.0",
+        "cheerio": "^1.0.0-rc.2",
+        "querystring": "^0.2.0",
+        "request": "^2.83.0",
+        "unirest": "^0.5.1",
+        "zlib": "^1.0.5"
+    },
+    "devDependencies": {
+        "chai": "^4.1.2",
+        "mocha": "^5.0.0"
+    },
+    "author": {
+        "name": "Ankirama"
+    },
+    "scripts": {
+        "test": "mocha --timeout 100000 --reporter spec tests/**/*.js "
+    }
+}
