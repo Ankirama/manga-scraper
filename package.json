@@ -1,7 +1,7 @@
 {
     "name": "manga-scraper",
     "version": "0.0.1",
-    "description": "This package will be used to scrape some manga websites via https://market.mashape.com/doodle/manga-scraper",
+    "description": "This package will be used to scrape some manga websites via https://market.mashape.com/doodle/manga-scraper and by scraping directly",
     "main": "index.js",
     "dependencies": {
         "async": "^2.6.0",
