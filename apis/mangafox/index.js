@@ -10,7 +10,7 @@ var mangafox = {
 var baseURI = 'http://fanfox.net';
 var baseURIDoodle = 'https://doodle-manga-scraper.p.mashape.com';
 
-function request(method, uri, isDoodle=true) {
+function request(method, uri, isDoodle = true) {
     return new Promise(function(resolve, reject) {
         let requestUri = baseURI + uri;
         if (isDoodle) {
@@ -66,18 +66,18 @@ mangafox.setAPIKey = function(apikey) {
     mangafox.apikey = apikey;
 }
 
-mangafox.getPages = function(manga, chapter){
+mangafox.getPages = function(manga, chapter) {
     return new Promise(function(resolve, reject) {
-        $.get(baseURI + '/manga/' + manga + '/' + chapter + '/1.html', function(err, d){
+        $.get(baseURI + '/manga/' + manga + '/' + chapter + '/1.html', function(err, d) {
             if (err) {
                 return reject(err);
             }
-            return resolve((d.find('.l option').length-2)/2);
+            return resolve((d.find('.l option').length - 2) / 2);
         }, true);
     });
 };
 
-mangafox.getChapter = function(manga, chapter){
+mangafox.getChapter = function(manga, chapter) {
     return new Promise(function(resolve, reject) {
         mangafox.getPages(manga, chapter)
             .then(function(num) {
@@ -90,13 +90,13 @@ mangafox.getChapter = function(manga, chapter){
                         let uri = '/manga/' + manga + '/' + chapter + '/' + n + '.html';
                         setTimeout(function() {
                             request('get', uri, false)
-                            .then(function(manga) {
-                                let d = cheerio(manga);
-                                data.push({pageId: n, url: d.find('#viewer img').attr('src')});
-                                n++;
-                                done(null, n);
-                            })
-                            .catch(done);
+                                .then(function(manga) {
+                                    let d = cheerio(manga);
+                                    data.push({ pageId: n, url: d.find('#viewer img').attr('src') });
+                                    n++;
+                                    done(null, n);
+                                })
+                                .catch(done);
                         }, 100);
                     },
                     function(err) {
@@ -106,7 +106,7 @@ mangafox.getChapter = function(manga, chapter){
                         }
                         resolve(data);
                     }
-             );
+                );
             })
             .catch(function(err) {
                 console.log('error => ', err);
@@ -125,7 +125,7 @@ function _mangaDetails(manga) {
                 return reject(err);
             }
             let json = {
-                name : undefined,
+                name: undefined,
                 description: undefined,
                 cover: undefined,
                 status: undefined,
@@ -139,12 +139,12 @@ function _mangaDetails(manga) {
                 json.mangaId = json.cover.split('/')[json.cover.split('/').length - 2];
                 json.status = $('.data span').text().split(',')[0].trim().toLowerCase();
             });
-    
+
             $('#title').filter(function() {
                 json.name = $('h1').text();
                 json.description = $('.summary').text();
             });
-    
+
             $('#chapters').filter(function() {
                 var volume_elms = $('.volume');
                 var chapter_elms = $('.chlist');
@@ -175,12 +175,12 @@ mangafox.getManga = function(id) {
         return _mangaDetails(id)
             .then(function(tmp) {
                 if (tmp.mangaId == undefined) {
-                    return reject({message: 'Unable to find your manga'});
+                    return reject({ message: 'Unable to find your manga' });
                 }
-                return $.post(baseURI + '/ajax/series.php', {sid: tmp.mangaId}, function(err, data) {
+                return $.post(baseURI + '/ajax/series.php', { sid: tmp.mangaId }, function(err, data) {
                     if (err) { return reject(err); }
                     try {
-                        if (data == false) { return reject({message: 'Unable to find your manga'}); }
+                        if (data == false) { return reject({ message: 'Unable to find your manga' }); }
                         data = JSON.parse(data);
                         let manga = {
                             name: data[0],
@@ -195,7 +195,7 @@ mangafox.getManga = function(id) {
                             chapters: tmp.chapters
                         };
                         return resolve(manga);
-                    } catch(e) {
+                    } catch (e) {
                         return reject(e);
                     }
                 })
