@@ -1,4 +1,4 @@
-var $ = new require('./request.js');
+var $ = new require('../utils/request.js');
 var unirest = require('unirest');
 var cheerio = require('cheerio');
 var async = require('async');
@@ -217,7 +217,7 @@ mangafox.getMangaList = function() {
             .then(function(data) {
                 let mangaList = [];
                 return async.each(data, function(manga, cb) {
-                    let tmp = formatMangaBase(manga)
+                    let tmp = formatMangaBase(manga);
                     if (tmp !== false) {
                         mangaList.push(tmp);
                     }
@@ -233,13 +233,12 @@ mangafox.getMangaList = function() {
 
 function searchPage(uri, page) {
     return new Promise(function(resolve, reject) {
-        url = uri + '&page=' + page;
+        let url = uri + '&page=' + page;
         $.get(url, function(err, d) {
             if (err) {
                 return reject(err);
             }
             let mangaList = [];
-            //console.log('debug result => ', d);
             let pages = parseInt(d.find('#nav > ul li').eq(-2).text());
             d.find('#mangalist > ul li').each(function(i, e) {
                 let b = cheerio(e).find('.title');
@@ -290,6 +289,34 @@ function search(url) {
 mangafox.search = function(query) {
     let url = baseURI + '/search.php?name_method=cw&name=' + encodeURIComponent(query) + '&type=&author_method=cw&author=&artist_method=cw&artist=&genres[Action]=0&genres[Adult]=0&genres[Adventure]=0&genres[Comedy]=0&genres[Doujinshi]=0&genres[Drama]=0&genres[Ecchi]=0&genres[Fantasy]=0&genres[Gender+Bender]=0&genres[Harem]=0&genres[Historical]=0&genres[Horror]=0&genres[Josei]=0&genres[Martial+Arts]=0&genres[Mature]=0&genres[Mecha]=0&genres[Mystery]=0&genres[One+Shot]=0&genres[Psychological]=0&genres[Romance]=0&genres[School+Life]=0&genres[Sci-fi]=0&genres[Seinen]=0&genres[Shoujo]=0&genres[Shoujo+Ai]=0&genres[Shounen]=0&genres[Shounen+Ai]=0&genres[Slice+of+Life]=0&genres[Smut]=0&genres[Sports]=0&genres[Supernatural]=0&genres[Tragedy]=0&genres[Webtoons]=0&genres[Yaoi]=0&genres[Yuri]=0&released_method=eq&released=&rating_method=eq&rating=&is_completed=&advopts=1';
     return search(url);
+}
+
+mangafox.latest = function() {
+    return new Promise(function(resolve, reject) {
+        let url = baseURI + '/releases/';
+        $.get(url, function(err, d) {
+            if (err) {
+                return reject(err);
+            }
+            let mangaList = [];
+            d.find('#content > ul li').each(function(i, e) {
+                let name = cheerio(e).find('.series_preview').text();
+                let mangaId = cheerio(e).find('.series_preview').attr('href').split('/');
+                mangaId = mangaId[mangaId.length - 2];
+                //                let date = $(e).find('#title > ul li').text();
+                let chapters = [];
+                $(e).find('dl dt').each(function(j, c) {
+                    if ($(this).find('em').text() == "Today") {
+                        chapters.push($(this).find('a').text());
+                    }
+                });
+                if (chapters.length > 0) {
+                    mangaList.push({ mangaId: mangaId, name: name, chapters: chapters, provider: 'mangafox' });
+                }
+            });
+            return resolve(mangaList);
+        }, true);
+    });
 }
 
 module.exports = mangafox;

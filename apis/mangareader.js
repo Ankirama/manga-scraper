@@ -1,4 +1,6 @@
+var $ = new require('../utils/request.js');
 var unirest = require('unirest');
+var cheerio = require('cheerio');
 
 var mangareader = {
     apikey: '',
@@ -50,7 +52,7 @@ mangareader.getManga = function(manga) {
     return new Promise(function(resolve, reject) {
         return request('get', '/manga/' + manga)
             .then(function(manga) {
-                if (manga.error != null) { return reject({message: manga.error}); }
+                if (manga.error != null) { return reject({ message: manga.error }); }
                 let chapters = [];
                 manga.description = 'Not available';
                 manga.chapters.forEach(function(chapter) {
@@ -85,6 +87,31 @@ mangareader.search = function(query = null, genres = null, limit = null) {
         uri += '&q=' + query.replace(' ', '+');
     }
     return request('get', uri);
+}
+
+mangareader.latest = function() {
+    return new Promise(function(resolve, reject) {
+        let url = 'http://www.mangareader.net/latest';
+        $.get(url, function(err, d) {
+            if (err) {
+                return reject(err);
+            }
+            let mangaList = [];
+            d.find('.c2').each(function(i, e) {
+                let date = $(e).find('.c1').text();
+                if (date === 'Today') {
+                    let name = cheerio(e).find('.chapter > strong').text();
+                    let mangaId = cheerio(e).find('.chapter').attr('href').split('/')[1];
+                    let chapters = [];
+                    $(e).find('.chaptersrec').each(function(j, c) {
+                        chapters.push($(this).text());
+                    });
+                    mangaList.push({ mangaId: mangaId, name: name, chapters: chapters, provider: 'mangareader' });
+                }
+            });
+            return resolve(mangaList);
+        }, true);
+    });
 }
 
 module.exports = mangareader;
