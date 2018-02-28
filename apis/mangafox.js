@@ -83,7 +83,6 @@ mangafox.getChapter = function(manga, chapter) {
             .then(function(num) {
                 var data = [];
                 let n = 1;
-                console.log("debug here..");
                 async.whilst(
                     function() { return n <= num },
                     function(done) {
@@ -260,6 +259,9 @@ function search(url) {
             }
             let mangaList = [];
             let pages = parseInt(d.find('#nav > ul li').eq(-2).text()) || 1;
+            if (pages > 400) {
+                return resolve({});
+            }
             let page = 1;
             async.whilst(
                 function() { return page <= pages },
